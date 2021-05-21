@@ -12,11 +12,16 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     Button btnDefaultNotification, btnBigTextNotification, btnBigPictureNotification,
             btnLargeIconNotification, btnPendingIntentNotification;
     private NotificationManager notificationManager;
+    private ExecutorService executorService;
+    private Handler handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +41,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btnPendingIntentNotification.setOnClickListener(this);
 
         notificationManager = NotificationManager.getInstance(this);
+        executorService = Executors.newSingleThreadExecutor();
+        handler = new Handler(Looper.getMainLooper());
     }
 
     @Override public void onClick(View v) {
@@ -57,17 +64,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 largeIconModel.setContent("This is content.");
                 largeIconModel.setIcon(R.drawable.ic_android);
 
-                HandlerThread handlerThread = new HandlerThread("MyHandlerThread");
-                handlerThread.start();
-                Looper looper = handlerThread.getLooper();
-                Handler handler = new Handler(looper);
-                handler.post(new Runnable() {
+                executorService.execute(new Runnable() {
                     @Override public void run() {
                         Bitmap bitmap = BitmapFactory.decodeResource(getResources(),
                                 R.drawable.android);
                         largeIconModel.setBigPicture(bitmap);
                         notificationManager.createNotification(largeIconModel).setLargeIcon().show();
-                        handlerThread.quit();
                     }
                 });
                 break;
@@ -79,17 +81,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 bigPictureModel.setContent("This is content.");
                 bigPictureModel.setIcon(R.drawable.ic_android);
 
-                HandlerThread handlerThread1 = new HandlerThread("MyHandlerThread1");
-                handlerThread1.start();
-                Looper looper1 = handlerThread1.getLooper();
-                Handler handler1 = new Handler(looper1);
-                handler1.post(new Runnable() {
+                executorService.execute(new Runnable() {
                     @Override public void run() {
                         Bitmap bitmap = BitmapFactory.decodeResource(getResources(),
                                 R.drawable.android);
                         bigPictureModel.setBigPicture(bitmap);
                         notificationManager.createNotification(bigPictureModel).setBigPicture().show();
-                        handlerThread1.quit();
                     }
                 });
                 break;
